@@ -5,6 +5,7 @@ on:
     branches: [main]
     tags: ['v*']
   pull_request:
+  workflow_dispatch:
 
 jobs:
   test:
@@ -31,7 +32,7 @@ jobs:
           node --experimental-strip-types -e "import('./src/mcp-client.ts').then(async ({ MailboxMcpClient }) => { const c = new MailboxMcpClient('uvx', 'git+https://github.com/polaris-smart/agent-mailbox', '', 90000); try { const out = await c.callTool('mailbox_whoami', {}); if (!out || out.length === 0) throw new Error('empty whoami'); console.log('SMOKE_OK'); } finally { c.dispose(); } }).catch((e) => { console.error('SMOKE_FAIL', e.message); process.exit(1); });"
 
   publish:
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: github.event_name == 'workflow_dispatch' && startsWith(github.ref, 'refs/tags/v')
     needs: test
     runs-on: ubuntu-latest
     permissions:
