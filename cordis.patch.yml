@@ -1,0 +1,13 @@
+# dsh-agent-mailbox 合一插件挂载层（headless profile overlay）。
+# 用法（插件 name 必须是绝对路径）：
+#   pnpm dsh --profile headless --patch <本文件绝对路径> "用 mailbox_check 看看有没有给我的留言"
+#
+# config.agentId 必填：本 dsh 会话在信箱里的身份 id（如 dsh-mac-01）。
+# mail root 默认 ~/.agent-mail——与 Claude Code / OpenCode 等宿主的
+# agent-mailbox MCP 共享同一信箱、同一任务板。
+- insert:
+    - id: dsh-agent-mailbox
+      name: dsh-agent-mailbox
+      config:
+        agentId: dsh-agent-01
+        runner: uvx
