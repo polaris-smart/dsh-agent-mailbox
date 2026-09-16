@@ -3,7 +3,8 @@
 > 背景：**0.1.0 是坏包** —— dist/plugin.js 的 import 仍带 `.ts` 后缀，而 dist 下只有 `.js`，
 > 消费者 `import 'dsh-agent-mailbox'` 必 `ERR_MODULE_NOT_FOUND`（详见 worklog 2026-09-16）。
 > 根因与修复：`830d4bd`（tsconfig.build.json + `rewriteRelativeImportExtensions`；CI TS→5.9.3；publish job 加 dist 入口断言）。
-> 状态：**等老板 go**；本文件不构成发版动作。
+> 追加（老板令「一步到位」）：`.d.ts` 的 `.ts` 后缀已在 0.1.1 内收口 + 加扩展门禁（见文末附）；version 已 bump 0.1.1。
+> 状态：**等老板 go**；本文件不构成发版动作。**禁 tag / 禁 dispatch / 禁 npm publish 三条红线维持**。
 
 ## 0. 前置（已完成）
 
@@ -28,10 +29,10 @@
 ## 2. 版本与产物（go 之后第一步）
 
 - [ ] `git fetch && git status`：工作树干净、HEAD == origin/main（确认无并发写者）
-- [ ] `package.json` version 0.1.0 → 0.1.1，commit `chore(release): 0.1.1`
+- [x] `package.json` version 0.1.0 → 0.1.1（本批已改；发版令仍等老板 go）
 - [ ] 本地四连（全过才准发）：
   1. `npx -y -p typescript@5.9.3 tsc --noEmit` → 0 错
-  2. `npx tsc -p tsconfig.build.json` → exit 0；`grep -n 'from "\./' dist/plugin.js` 必须**全是 `.js`**
+  2. `npm run build` → exit 0；`node scripts/assert-dist-ext.mjs` → `EXT_OK`（**.js 与 .d.ts 双口径**，`.ts` 后缀必须为 0）
   3. `node -e "import('./dist/plugin.js').then((m)=>{if(m.name!=='dsh-agent-mailbox')throw new Error('bad');console.log('DIST_OK')})"` → `DIST_OK`
      ← **0.1.0 坏包的拦截线**，CI publish job 已内置同款步骤
   4. `bash smoke.sh` → `SMOKE ALL GREEN`
@@ -59,10 +60,26 @@
 - npm 已发布版本超过 48 小时只能 deprecate、不能 unpublish ⇒ **发前必须跑完第 2 节四连**
 - 若 0.1.1 仍坏：直接发 0.1.2，不要在坏版本上打补丁
 
-## 附：dist/\*.d.ts 内 `.ts` 后缀小账 —— 实测非缺陷，0.1.1 不改
+## 附：dist/\*.d.ts 内 `.ts` 后缀 —— **0.1.1 已修**（老板拍板「一步到位」）
 
-- TS 5.9.3 实测：`rewriteRelativeImportExtensions` **只改写 JS**，不改写声明文件
-  （dist/plugin.d.ts 仍写 `from './config.ts'`）
-- 但消费者侧解析无碍：TS 会把 `./x.ts` 映射到同名 `x.d.ts`。strict + 无 skipLibCheck 的消费实测中，
-  唯一报错是 `@deepseek-ai/cordis` 未安装（peer dep，dsh 宿主装齐即消），与 `.ts` 后缀无关
-- 结论：**不改**。若日后要洁癖，可加一步 postbuild 把 dist/\*.d.ts 的 `.ts` 改 `.js` —— 不值得为它引入构建步骤
+**修法**（`scripts/fix-dts-ext.mjs`，挂在 `npm run build` 尾部）：
+
+- TS 只改写 JS emit 的事实不变（`rewriteRelativeImportExtensions` 不碰声明文件），故在**产物侧收口**：
+  构建后改写 `dist/**/*.d.ts` 里 import/export 语句的相对 specifier `.ts|.tsx|.mts|.cts` → `.js|.js|.mjs|.cjs`，
+  改完自检残留，有残留即 exit 1（fail-loud，防半成品产物出门）
+- **门禁**：`scripts/assert-dist-ext.mjs` 扫描 `dist/**/*.{js,d.ts}`，相对 specifier 带 `.ts` 后缀即红。
+  接了两处——test job（每次 push 都跑，**杜绝复发**的主力）＋ publish job 的 dist 入口校验步（发布前再拦一次）
+- 源码侧不动：src 用 `.ts` 后缀是刻意的（`node --experimental-strip-types` 直接跑 src 要靠它）
+
+**性质更正（实测，2026-09-16）**：本账此前记「等日后洁癖再修」，且老板侧对其影响面的描述为「消费者不开
+skipLibCheck 会报 TS5097」——**该失败模式实测不成立**：
+
+| 探针（TS 5.9.3） | .d.ts 写 `.ts` | .d.ts 写 `.js` |
+|---|---|---|
+| 消费端 import（moduleResolution=NodeNext, skipLibCheck=false） | exit 0 | exit 0 |
+| 消费端 import（moduleResolution=Node16, skipLibCheck=false） | exit 0 | exit 0 |
+| 阳性对照：`.ts` **源文件**引一个真实存在的 `.ts` 路径 | **TS5097** | — |
+
+⇒ TS 会在声明文件里把 `./x.ts` 映射到同名 `x.d.ts`，故 TS5097 的触发条件是「**源文件**引 `.ts`」，
+不是「包的 .d.ts 里带 `.ts`」。0.1.0 真正的对外断裂是 **JS emit**（`ERR_MODULE_NOT_FOUND`，`830d4bd` 已修），
+`.d.ts` 后缀属**卫生问题**而非功能缺陷。本次按老板令修掉并把门禁加上，属「一步到位」的洁癖收口，不是修 bug。

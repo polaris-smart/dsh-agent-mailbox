@@ -1,6 +1,6 @@
 {
   "name": "dsh-agent-mailbox",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "dsh (DeepSeek Harness) 跨 agent 信箱插件：让 dsh 会话内的 agent 通过 agent-mailbox 与本机其他 agent（Claude Code / OpenCode / Hermes…）互发消息、收任务卡、卡动即唤醒。零 npm 依赖，Node 22 即装即用。",
   "repository": {
     "type": "git",
