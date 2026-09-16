@@ -33,7 +33,7 @@
     "typecheck": "tsc --noEmit",
     "smoke": "bash smoke.sh",
     "pack": "npm pack",
-    "build": "tsc --noCheck -p tsconfig.build.json"
+    "build": "tsc --noCheck -p tsconfig.build.json && node scripts/fix-dts-ext.mjs"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "*"

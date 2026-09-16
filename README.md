@@ -65,6 +65,7 @@ The plugin spawns `agent-mailbox` (MCP stdio) as a child process on first tool c
 - **`uvx: command not found`** — install uv (see Prerequisites), or set `runner: python` if agent_mailbox is importable by system python3.
 - **`spawn failed 3 times`** — verify `uvx --from git+https://github.com/polaris-smart/agent-mailbox agent-mailbox --help` works in your shell.
 - **No messages from other hosts** — confirm they use the same mail root (default `~/.agent-mail`; check their `AGENT_MAIL_HOME`).
+- **Consumer reports `TS5097`** (`An import path can only end with a '.ts' extension...`) — that is **0.1.0**: its `dist/*.d.ts` still imports with a `.ts` extension (TypeScript rewrites JS emit but not declaration files). Either upgrade to **>=0.1.1** (rewritten at build time) or set `skipLibCheck: true` in your tsconfig.
 
 ## License
 
