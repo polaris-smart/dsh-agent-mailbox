@@ -23,6 +23,7 @@
 | Node | ≥22.18 | --experimental-strip-types |
 | agent-mailbox | ≥0.4.0 | uvx --from git+… 或 python3 -m |
 | dsh / cordis | 4.x | Config 必须带 ~standard.validate |
+| TypeScript（仅构建期） | ≥5.7（CI 用 5.9.3） | 源码 import 带 `.ts` 后缀，dist 靠 `rewriteRelativeImportExtensions` 改写为 `.js`；5.6 及以下编译必报 TS5096 |
 
 ## 红线（继承 agent-mailbox 项目纪律）
 

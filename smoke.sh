@@ -4,7 +4,7 @@ set -e
 cd "$(dirname "$0")"
 
 echo "== 1/3 typecheck =="
-npx -y typescript@5.6.3 tsc --noEmit
+npx -y -p typescript@5.9.3 tsc --noEmit
 
 echo "== 2/3 unit tests =="
 node --test --experimental-strip-types test/*.test.ts

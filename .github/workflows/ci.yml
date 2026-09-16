@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: 22
       - name: Install typescript
-        run: npm install --no-save typescript@5.6.3 @types/node
+        run: npm install --no-save typescript@5.9.3 @types/node
       - name: Typecheck
         run: npx tsc --noEmit
       - name: Unit tests
@@ -43,8 +43,11 @@ jobs:
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org/
-      - run: npm install --no-save typescript@5.6.3 @types/node
+      - run: npm install --no-save typescript@5.9.3 @types/node
       - run: npx tsc -p tsconfig.build.json
+      - name: Verify dist entry resolves
+        run: |
+          node -e "import('./dist/plugin.js').then((m) => { if (m.name !== 'dsh-agent-mailbox') throw new Error('unexpected plugin export: ' + m.name); console.log('DIST_OK'); }).catch((e) => { console.error('DIST_FAIL', e.message); process.exit(1); });"
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
