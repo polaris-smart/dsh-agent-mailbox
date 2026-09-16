@@ -24,7 +24,6 @@
     "dist/",
     "src/",
     "cordis.patch.yml",
-    "TROUBLESHOOTING.md",
     "README.md",
     "README.zh-CN.md"
   ],
