@@ -42,6 +42,6 @@
       "patch": "./cordis.patch.yml"
     }
   },
-  "main": "dist/plugin.js",
+  "main": "src/plugin.ts",
   "license": "MIT"
 }
