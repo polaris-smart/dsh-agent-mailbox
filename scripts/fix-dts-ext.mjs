@@ -3,7 +3,8 @@
 //
 // 为什么需要：TS 5.9 的 `rewriteRelativeImportExtensions` 只改写 JS emit，
 // 声明文件里的 import specifier 原样保留（dist/plugin.d.ts 仍写 `'./config.ts'`）。
-// 未开 `skipLibCheck` 的消费者解析该包时会撞 TS5097。
+// 消费端实测不受影响（TS 把 `./x.ts` 映射到同名 `x.d.ts`，NodeNext / Node16 均 exit 0）
+// ⇒ 属卫生收口而非修 bug，改掉是为产物一致。
 // 为什么不用源码侧规避：src 用 `.ts` 后缀是刻意的——`node --experimental-strip-types`
 // 直接跑 src（smoke.sh / 单测）要靠它解析到真实文件。故改在构建产物侧收口。
 //

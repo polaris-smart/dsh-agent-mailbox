@@ -65,7 +65,8 @@ pnpm dsh --profile headless --patch /path/to/cordis.patch.yml "用 mailbox_check
 - **`uvx: command not found`** — 装 uv（见前置），或 agent_mailbox 可被系统 python3 导入时设 `runner: python`。
 - **`spawn failed 3 times`** — 先在 shell 里验证 `uvx --from git+https://github.com/polaris-smart/agent-mailbox agent-mailbox --help` 能跑。
 - **收不到其他宿主的消息** — 确认大家的 mail root 一致（默认 `~/.agent-mail`；查对方 `AGENT_MAIL_HOME`）。
-- **消费端报 `TS5097`**（`An import path can only end with a '.ts' extension...`）— 出现在 **0.1.0**：该版本 `dist/*.d.ts` 内的 import 仍带 `.ts` 后缀（TS 只改写 JS、不改写声明文件）。两种解法：升到 **≥0.1.1**（构建已收口），或在 tsconfig 里开 `skipLibCheck: true`。
+- **导入时报 `ERR_MODULE_NOT_FOUND`**（`Cannot find module '.../xxx.ts'`）— 出现在 **0.1.0**：该版本 `dist/*.js` 的相对引入仍带 `.ts` 后缀，Node 解析不到。**≥0.1.1** 已在构建期改写修掉。
+- **包的 `dist/*.d.ts` 里带 `.ts` 后缀**（0.1.0）— **不是断裂**：TS 会把 `./x.ts` 映射到同名 `x.d.ts`，消费端可正常解析；`TS5097` 的触发条件是「**源文件**引真实存在的 `.ts` 路径」。**≥0.1.1** 也已一并改写。
 
 ## License
 

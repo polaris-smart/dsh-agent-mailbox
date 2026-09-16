@@ -3,7 +3,7 @@
 //
 // 覆盖两类产物：
 //   - dist/**/*.js    —— 0.1.0 坏包就是这里带 .ts（消费者 ERR_MODULE_NOT_FOUND）
-//   - dist/**/*.d.ts  —— TS 只改写 JS 不改写声明，需构建后处理收口（未开 skipLibCheck 的消费者报 TS5097）
+//   - dist/**/*.d.ts  —— TS 只改写 JS 不改写声明，需构建后处理收口（.ts 后缀不断裂消费端，属卫生项）
 // 任一类残留即 exit 1，用于「杜绝复发」（CI test job 每次 push 都跑 / publish job 发布前再跑一遍）。
 //
 // 用法：node scripts/assert-dist-ext.mjs
