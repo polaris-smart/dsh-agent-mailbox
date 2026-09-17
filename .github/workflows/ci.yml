@@ -28,6 +28,8 @@ jobs:
         run: |
           npm run build
           node scripts/assert-dist-ext.mjs
+      - name: Packed-artifact entry gate (node_modules import + negative control)
+        run: node scripts/assert-nm-entry.mjs
       - name: Smoke (real MCP spawn via uvx)
         if: matrix.os != 'windows-latest'
         run: |
