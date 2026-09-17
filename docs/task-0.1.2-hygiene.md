@@ -27,7 +27,7 @@
 
 - [x] **pack 清单对锚**（ZC 本地 2026-09-17 实测）：17 项 = 0.1.1 已上架 16 项 **+ `LICENSE`**；`diff -r` 逐文件比对——仅 `README.md`/`README.zh-CN.md`/`package.json` 三处 expected diff，`dist/`（8）+ `src/`（4）**逐字节同源**，零改名零丢失。
 - [x] **装包形态门禁自查**（本地）：正向 `LOAD_OK dsh-agent-mailbox`；阴性对照如期红 `ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`；LICENSE 在位（`node scripts/assert-nm-entry.mjs` exit 0）。
-- [ ] CI 三平台（ubuntu/macos/windows）test job 绿，且含新断言与阴性对照步（待 push 后据 run 结论回填）。
+- [x] **CI 三平台 test job 绿且含新断言与阴性对照步**：run [`35230428160`](https://github.com/polaris-smart/dsh-agent-mailbox/actions/runs/35230428160)（head `35bca89`）success——ubuntu / macos / windows 三平台 **`Packed-artifact entry gate (node_modules import + negative control)` step 均 success**（Windows 日志实测 `LOAD_OK dsh-agent-mailbox` + 阴性对照 `ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING` 如期红）；publish job = skipped（非 tag dispatch，符合预期）。
 - [ ] 真机：dsh profile 从 registry 装 0.1.2 后 `mailbox_check` 通（沿用 0.1.1 的 E2E 姿势：session 落盘 `tool/call` → `tool/result`）——发版后执行。
 
 ## 边界（红线）
