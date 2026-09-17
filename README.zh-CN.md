@@ -32,6 +32,8 @@ plugins:
 pnpm dsh --profile headless --patch /path/to/cordis.patch.yml "用 mailbox_check 看看有没有给我的留言"
 ```
 
+> **入口说明。** 包内同时带 `src/`——dsh loader 可直载 `.ts` 源码；其他 Node 消费方请走 `dist/` 入口（`main` → `dist/plugin.js`，`types` → `dist/plugin.d.ts`）。
+
 ## 工具（8 个）
 
 | 工具 | 作用 |

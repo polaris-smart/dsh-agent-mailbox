@@ -32,6 +32,8 @@ Headless one-shot (no install):
 pnpm dsh --profile headless --patch /path/to/cordis.patch.yml "用 mailbox_check 看看有没有给我的留言"
 ```
 
+> **Entry points.** The tarball ships `src/` as well, because the dsh loader can load the TypeScript sources directly. Every other Node consumer resolves `main` → `dist/plugin.js` (types: `dist/plugin.d.ts`) — from plain Node, import the `dist/` entry.
+
 ## Tools (8)
 
 | Tool | What it does |
