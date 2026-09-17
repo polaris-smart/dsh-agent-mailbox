@@ -25,7 +25,8 @@
     "src/",
     "cordis.patch.yml",
     "README.md",
-    "README.zh-CN.md"
+    "README.zh-CN.md",
+    "LICENSE"
   ],
   "scripts": {
     "test": "node --test",
@@ -42,6 +43,7 @@
       "patch": "./cordis.patch.yml"
     }
   },
-  "main": "src/plugin.ts",
+  "main": "dist/plugin.js",
+  "types": "dist/plugin.d.ts",
   "license": "MIT"
 }
