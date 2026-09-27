@@ -80,8 +80,9 @@ try {
   // 3) LICENSE 在位（MIT 义务：版权行随副本分发）
   try {
     const lic = readFileSync(join(installed, 'LICENSE'), 'utf8')
-    if (!lic.startsWith('MIT License') || !lic.includes('Copyright (c) 2026 NoFox Team'))
-      fail('LICENSE 内容不符：应为 MIT 全文 + Copyright (c) 2026 NoFox Team')
+    // 09-27 对齐 LICENSE 现状（09-24 老板拍板署名改 polaris-smart contributors，gate 期望值漏同步致 CI 红）
+    if (!lic.startsWith('MIT License') || !lic.includes('Copyright (c) 2026 polaris-smart contributors'))
+      fail('LICENSE 内容不符：应为 MIT 全文 + Copyright (c) 2026 polaris-smart contributors')
     else console.log('LICENSE: MIT 全文 + 版权行在位')
   } catch {
     fail('pack 产物内无 LICENSE（files 白名单漏项）')
