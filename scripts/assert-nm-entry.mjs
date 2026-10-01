@@ -33,7 +33,7 @@ const PROBE = `import(${JSON.stringify(PKG)})
   .catch((e) => { console.error('LOAD_FAIL ' + (e.code || e.name) + ' ' + e.message); process.exit(1) })`
 
 const npm = (args, cwd) =>
-  execFileSync(NPM, args, { cwd, encoding: 'utf8', shell: WIN, stdio: ['ignore', 'pipe', 'pipe'] })
+  execFileSync(NPM, [...args, '--registry=https://registry.npmjs.org'], { cwd, encoding: 'utf8', shell: WIN, stdio: ['ignore', 'pipe', 'pipe'] })
 
 function probe(fixture) {
   try {

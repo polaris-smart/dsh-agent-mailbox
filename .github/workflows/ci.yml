@@ -2,10 +2,13 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, feat/v080-project-mcp]
     tags: ['v*']
   pull_request:
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   test:
@@ -19,7 +22,7 @@ jobs:
         with:
           node-version: 22
       - name: Install typescript
-        run: npm install --no-save typescript@5.9.3 @types/node
+        run: npm install --no-save typescript@5.9.3 @types/node --registry=https://registry.npmjs.org
       - name: Typecheck
         run: npx tsc --noEmit
       - name: Unit tests
@@ -30,18 +33,15 @@ jobs:
           node scripts/assert-dist-ext.mjs
       - name: Packed-artifact entry gate (node_modules import + negative control)
         run: node scripts/assert-nm-entry.mjs
-      - name: Smoke (real MCP spawn via uvx)
-        if: matrix.os != 'windows-latest'
-        run: |
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-          export PATH="$HOME/.local/bin:$PATH"
-          node --experimental-strip-types -e "import('./src/mcp-client.ts').then(async ({ MailboxMcpClient }) => { const c = new MailboxMcpClient('uvx', 'git+https://github.com/polaris-smart/agent-mailbox', '', 90000); try { const out = await c.callTool('mailbox_whoami', {}); if (!out || out.length === 0) throw new Error('empty whoami'); console.log('SMOKE_OK'); } finally { c.dispose(); } }).catch((e) => { console.error('SMOKE_FAIL', e.message); process.exit(1); });"
+      - name: Verify publication file whitelist
+        run: npm pack --dry-run --registry=https://registry.npmjs.org
 
   publish:
     if: github.event_name == 'workflow_dispatch' && startsWith(github.ref, 'refs/tags/v')
     needs: test
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       id-token: write
     steps:
       - uses: actions/checkout@v4
@@ -49,12 +49,12 @@ jobs:
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org/
-      - run: npm install --no-save typescript@5.9.3 @types/node
+      - run: npm install --no-save typescript@5.9.3 @types/node --registry=https://registry.npmjs.org
       - run: npm run build
       - name: Verify dist entry resolves + extensions clean
         run: |
           node -e "import('./dist/plugin.js').then((m) => { if (m.name !== 'dsh-agent-mailbox') throw new Error('unexpected plugin export: ' + m.name); console.log('DIST_OK'); }).catch((e) => { console.error('DIST_FAIL', e.message); process.exit(1); });"
           node scripts/assert-dist-ext.mjs
-      - run: npm publish
+      - run: npm publish --registry=https://registry.npmjs.org
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

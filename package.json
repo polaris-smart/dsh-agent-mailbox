@@ -1,8 +1,8 @@
 {
   "name": "dsh-agent-mailbox",
-  "version": "0.1.2",
+  "version": "0.8.0",
   "author": "polaris-smart",
-  "description": "dsh (DeepSeek Harness) 跨 agent 信箱插件：让 dsh 会话内的 agent 通过 agent-mailbox 与本机其他 agent（Claude Code / OpenCode / Hermes…）互发消息、收任务卡、卡动即唤醒。零 npm 依赖，Node 22 即装即用。",
+  "description": "Project-scoped agent-mailbox tools for existing DeepSeek Harness sessions. Private session-file connection; no provider keys or managed CLI tasks.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/polaris-smart/dsh-agent-mailbox.git"
@@ -30,14 +30,14 @@
     "LICENSE"
   ],
   "scripts": {
-    "test": "node --test",
+    "test": "node --test --experimental-strip-types test/*.test.ts",
     "typecheck": "tsc --noEmit",
     "smoke": "bash smoke.sh",
     "pack": "npm pack",
     "build": "tsc --noCheck -p tsconfig.build.json && node scripts/fix-dts-ext.mjs"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "*"
+    "@deepseek-ai/cordis": "^4.0.2"
   },
   "dsh": {
     "bundle": {

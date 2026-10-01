@@ -1,75 +1,46 @@
 # dsh-agent-mailbox
 
-**给你的 dsh agent 一个信箱。** dsh 插件：注册 8 个 `mailbox_*` 工具，让 dsh（DeepSeek Harness）会话直接与本机其他 AI agent（Claude Code / OpenCode / Hermes / 任意 MCP 宿主）互发消息、收任务卡——全部走 [agent-mailbox](https://github.com/polaris-smart/agent-mailbox)。零 npm 依赖，Node 22+。
+**这是与工作台 v0.8.0 配套的源码候选，尚未发布到 npm。已经公开的工作台 Beta 4 不含这个既有会话邮箱入口。**
 
-## 为什么
+给**已有 DeepSeek Harness 会话**接入 [agent-mailbox](https://github.com/polaris-smart/agent-mailbox) 项目信箱：进组、读共享资料、发邮件、更新自己负责的任务。员工继续用自己的模型和账号；插件不会启动另一个员工 CLI，也不替你配置 LLM。
 
-agent-mailbox 已经给每个本地 agent 提供共享收件箱+任务板，但每个宿主要单独接。本插件是 **dsh 的原生入口**：同一个信箱、同一个 `~/.agent-mail` 存储、同样的「信到即唤醒」——dsh 原生工具，不用手工配 MCP。
+[English](README.md)
 
-## 安装
+## 从旧版升级
 
-前置：[uv](https://docs.astral.sh/uv/)（`curl -LsSf https://astral.sh/uv/install.sh | sh`）——插件经 `uvx` 启动 agent-mailbox。
+0.8 替换旧版全局信箱桥接。旧的 `agentId`、`home`、`runner`、`uvxFrom`、`pythonSrc` 配置会明确报迁移提示；不会自动导入旧全局信箱。
 
-```bash
-dsh plugin add github:polaris-smart/dsh-agent-mailbox
-```
-
-然后配插件（`config.agentId` 必填——给本 dsh 实例起个唯一 id，如 `dsh-mac-01`）：
+1. 安装 agent-mailbox v0.8，打开工作台。
+2. 登记 DSH 员工、加入项目，导出该员工的**私有会话连接文件**。
+3. 在 DSH 环境安装插件，给项目会话加 overlay：
 
 ```yaml
-# cordis.yml
-plugins:
-  - id: dsh-agent-mailbox
-    name: dsh-agent-mailbox
-    config:
-      agentId: dsh-mac-01
-      runner: uvx
+- insert:
+    - id: dsh-agent-mailbox
+      name: dsh-agent-mailbox
+      config:
+        sessionFile: /absolute/path/to/private/employee-session.json
+        executable: /absolute/path/to/agent-mailbox
 ```
 
-免安装试一把（headless 单发）：
+`executable` 是已安装的 agent-mailbox 命令或后台程序，不是 DMG 文件。Python 安装可用 `executable: /absolute/path/to/python` 和 `executableArgs: ['-m', 'agent_mailbox']`。参数以数组传入，不经过 shell。不要在配置、仓库或聊天中放 provider key 或信箱 token。
 
-```bash
-pnpm dsh --profile headless --patch /path/to/cordis.patch.yml "用 mailbox_check 看看有没有给我的留言"
-```
+使用宿主现有的 profile/patch 方式打开新会话；不承诺现有聊天自动热加载。工作台须保持运行，重启更换本机端口后连接仍能找到它。会话到期、撤销或成员退出，需要重新接入。
 
-> **入口说明。** 包内同时带 `src/`——dsh loader 可直载 `.ts` 源码；其他 Node 消费方请走 `dist/` 入口（`main` → `dist/plugin.js`，`types` → `dist/plugin.d.ts`）。
+## 工具与职责
 
-## 工具（8 个）
+激活时发现服务器实际授权的 `project_*` 工具及参数 schema。当前包含项目上下文、共享资料/笔记、收发邮件，以及自己的任务进度接口。没有旧 `mailbox_*` 全局别名、发件人身份覆盖或启动受管任务的唤醒工具。
 
-| 工具 | 作用 |
-|---|---|
-| `mailbox_send` | 发消息给单个 / 多个（逗号分隔）/ `all` 广播 |
-| `mailbox_check` | 收未读（收取即置已读）——会话开始时调 |
-| `mailbox_reply` | 按线索回复（自动路由回发件人） |
-| `mailbox_list` | 列收件箱（status 过滤） |
-| `mailbox_done` | 消息处理完标记 done |
-| `mailbox_broadcast` | 全体注册 agent 公告 |
-| `mailbox_task_create` | 任务板建卡 → 自动向负责人发消息唤醒 |
-| `mailbox_task_list` | 看共享任务板 |
+一个私有 session 文件绑定一个员工与一个项目。读信不代表接受任务或完成；普通邮件不启动任务；Human 验收独立记录。子代理向负责人汇报，不得共享负责人会话文件。自动提醒是否可用取决于宿主能力，不是装了此工具桥就保证自动唤醒。
 
-全部工具 1:1 转发 [agent-mailbox](https://github.com/polaris-smart/agent-mailbox) 的 MCP 面（`uvx --from git+https://github.com/polaris-smart/agent-mailbox`），共享同一 mail root——dsh 发的消息落在 Claude Code 读的同一个信箱里，反之亦然。
+插件实例各自连接、各自释放；启动失败明确报错，卸载时注销工具并退出 MCP 子进程。插件不读取 token 或数据库。
 
-## 配置
+## 验证与发布
 
-| 键 | 默认 | 说明 |
-|---|---|---|
-| `agentId` | *（必填）* | 本 dsh 实例的信箱身份 |
-| `home` | `~/.agent-mail` | 信箱根目录；保持默认即可与其他宿主共享 |
-| `runner` | `uvx` | `uvx`（需装 uv）或 `python`（走 `python3 -m agent_mailbox.server`） |
-| `uvxFrom` | git+https://github.com/polaris-smart/agent-mailbox | uvx 来源 |
+需要 Node >=22.18；宿主提供 `@deepseek-ai/cordis` peer。开发命令见英文 README。候选源码版本为 `0.8.0`，源码更新不等于 npm 已发布。
 
-## 工作原理
+既有 npm 包名为 `dsh-agent-mailbox`，维护者 `polaris-smart`。发包必须显式指定 `--registry=https://registry.npmjs.org`；不要使用其他人的 npm 无 scope 同名包 `agent-mailbox`。
 
-首次工具调用时以 MCP stdio 子进程方式拉起 `agent-mailbox`，走 JSON-RPC 2.0，结果转成 dsh 工具输出。每会话共享一个子进程。启动命令是字面量常量（`uvx` / `python3`）+ 参数数组——无 shell、无拼接。
+## 协议
 
-## 排障
-
-- **`uvx: command not found`** — 装 uv（见前置），或 agent_mailbox 可被系统 python3 导入时设 `runner: python`。
-- **`spawn failed 3 times`** — 先在 shell 里验证 `uvx --from git+https://github.com/polaris-smart/agent-mailbox agent-mailbox --help` 能跑。
-- **收不到其他宿主的消息** — 确认大家的 mail root 一致（默认 `~/.agent-mail`；查对方 `AGENT_MAIL_HOME`）。
-- **导入时报 `ERR_MODULE_NOT_FOUND`**（`Cannot find module '.../xxx.ts'`）— 出现在 **0.1.0**：该版本 `dist/*.js` 的相对引入仍带 `.ts` 后缀，Node 解析不到。**≥0.1.1** 已在构建期改写修掉。
-- **包的 `dist/*.d.ts` 里带 `.ts` 后缀**（0.1.0）— **不是断裂**：TS 会把 `./x.ts` 映射到同名 `x.d.ts`，消费端可正常解析；`TS5097` 的触发条件是「**源文件**引真实存在的 `.ts` 路径」。**≥0.1.1** 也已一并改写。
-
-## License
-
-MIT
+独立适配器保留原有 **MIT** 协议与版权声明。agent-mailbox v0.8 应用另采用 **Apache-2.0**、NoFox 署名，两者分别适用。
