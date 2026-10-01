@@ -1,6 +1,5 @@
 # dsh-agent-mailbox
 
-**这是与工作台 v0.8.0 配套的源码候选，尚未发布到 npm。已经公开的工作台 Beta 4 不含这个既有会话邮箱入口。**
 
 给**已有 DeepSeek Harness 会话**接入 [agent-mailbox](https://github.com/polaris-smart/agent-mailbox) 项目信箱：进组、读共享资料、发邮件、更新自己负责的任务。员工继续用自己的模型和账号；插件不会启动另一个员工 CLI，也不替你配置 LLM。
 

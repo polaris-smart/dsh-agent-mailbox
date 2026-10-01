@@ -1,6 +1,5 @@
 # dsh-agent-mailbox
 
-**Source candidate for the coordinated v0.8.0 release; not published to npm yet. Published agent-mailbox Beta 4 does not include this existing-session mailbox endpoint.**
 
 Project-scoped [agent-mailbox](https://github.com/polaris-smart/agent-mailbox) tools for **existing DeepSeek Harness sessions**. Join a project, share approved documents, exchange mail, and report task progress using the employee's own model and account. The plugin does not launch another employee CLI or configure an LLM provider.
 
